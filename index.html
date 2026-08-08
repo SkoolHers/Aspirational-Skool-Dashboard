@@ -1,0 +1,410 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Vision Dashboard</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    background: #e9e6df;
+    color: #202124;
+    display: flex;
+    justify-content: center;
+    padding: 24px 12px;
+    min-height: 100vh;
+  }
+  .modal {
+    background: #ffffff;
+    border-radius: 12px;
+    box-shadow: 0 4px 24px rgba(0,0,0,0.12);
+    width: 100%;
+    max-width: 1080px;
+    overflow: hidden;
+  }
+  .topbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 20px;
+    border-bottom: 1px solid #e8e6e1;
+  }
+  .topbar-left { display: flex; align-items: center; gap: 10px; }
+  .logo {
+    width: 36px; height: 36px; border-radius: 8px;
+    background: #f5b73f;
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 700; font-size: 16px; color: #7a4a00;
+  }
+  .community-name { font-weight: 700; font-size: 15px; outline: none; }
+  .close { color: #9a988f; font-size: 22px; line-height: 1; cursor: default; }
+
+  .layout { display: flex; }
+  .sidebar {
+    width: 210px;
+    flex-shrink: 0;
+    border-right: 1px solid #e8e6e1;
+    padding: 20px 12px;
+  }
+  .nav-item {
+    padding: 10px 16px;
+    border-radius: 10px;
+    font-size: 15px;
+    font-weight: 700;
+    margin-bottom: 2px;
+  }
+  .nav-item.active { background: #f7dc94; }
+  .nav-item:not(.active) { font-weight: 600; color: #202124; }
+
+  .main {
+    flex: 1;
+    padding: 24px 32px 32px;
+    min-width: 0;
+  }
+  .greeting-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 24px;
+  }
+  .greeting { font-size: 20px; font-weight: 700; }
+  .greeting .editable { outline: none; }
+  .share-link {
+    font-size: 13px;
+    color: #9a988f;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .section-label { font-size: 14px; font-weight: 700; margin-bottom: 10px; }
+  .section-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 10px;
+  }
+  .period { font-size: 13px; color: #9a988f; }
+
+  .cards {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 12px;
+    margin-bottom: 28px;
+  }
+  .card {
+    background: #f7f5f0;
+    border: 1px solid #eceae4;
+    border-radius: 10px;
+    padding: 22px 12px;
+    text-align: center;
+  }
+  .metric {
+    font-size: 22px;
+    font-weight: 700;
+    outline: none;
+    display: inline-block;
+    min-width: 1ch;
+  }
+  .metric-label {
+    font-size: 13px;
+    color: #8b897f;
+    margin-top: 4px;
+  }
+
+  .signups-section { margin-bottom: 12px; }
+  .signups-flex {
+    display: flex;
+    align-items: center;
+    gap: 40px;
+    padding: 8px 0 4px;
+  }
+  .donut-wrap { width: 220px; height: 220px; flex-shrink: 0; }
+  .source-list { font-size: 14px; }
+  .source-row {
+    display: grid;
+    grid-template-columns: 16px 130px 40px 50px;
+    gap: 10px;
+    align-items: center;
+    padding: 5px 0;
+  }
+  .source-dot { width: 12px; height: 12px; border-radius: 3px; }
+  .source-name { font-weight: 600; }
+  .source-count { text-align: right; outline: none; }
+  .source-pct { color: #9a988f; }
+
+  .footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 14px 32px;
+    border-top: 1px solid #e8e6e1;
+    background: #fbfaf8;
+  }
+  .hint { font-size: 12px; color: #9a988f; }
+  .reset {
+    font-size: 13px;
+    font-weight: 600;
+    color: #202124;
+    background: #ffffff;
+    border: 1px solid #d9d6ce;
+    border-radius: 8px;
+    padding: 7px 14px;
+    cursor: pointer;
+  }
+  .reset:hover { background: #f3f1ec; }
+
+  .brand-footer {
+    text-align: center;
+    padding: 20px 32px 24px;
+    background: #ffffff;
+    border-top: 1px solid #e8e6e1;
+  }
+  .brand-name {
+    font-size: 20px;
+    font-weight: 800;
+    letter-spacing: 0.5px;
+  }
+  .brand-tagline {
+    font-size: 12px;
+    color: #9a988f;
+    margin-top: 4px;
+  }
+  .brand-link {
+    display: inline-block;
+    margin-top: 10px;
+    font-size: 13px;
+    font-weight: 700;
+    color: #ffffff;
+    background: #D9705C;
+    text-decoration: none;
+    border-radius: 8px;
+    padding: 8px 18px;
+  }
+  .brand-link:hover { background: #c65f4b; }
+
+  [contenteditable]:focus {
+    background: #fdf3d7;
+    border-radius: 4px;
+  }
+
+  @media (max-width: 760px) {
+    .sidebar { display: none; }
+    .cards { grid-template-columns: repeat(2, 1fr); }
+    .signups-flex { flex-direction: column; align-items: flex-start; gap: 16px; }
+    .main { padding: 20px 16px 24px; }
+  }
+</style>
+</head>
+<body>
+<div class="modal">
+  <div class="topbar">
+    <div class="topbar-left">
+      <div class="logo" contenteditable="true" id="logo">S</div>
+      <span class="community-name" contenteditable="true" id="community">SkoolHers</span>
+    </div>
+    <span class="close">&times;</span>
+  </div>
+
+  <div class="layout">
+    <nav class="sidebar">
+      <div class="nav-item active">Dashboard</div>
+      <div class="nav-item">Discovery</div>
+      <div class="nav-item">Invite</div>
+      <div class="nav-item">General</div>
+      <div class="nav-item">Payouts</div>
+      <div class="nav-item">Pricing</div>
+      <div class="nav-item">Affiliates</div>
+      <div class="nav-item">Plugins</div>
+      <div class="nav-item">Community</div>
+      <div class="nav-item">Notifications</div>
+      <div class="nav-item">Billing</div>
+    </nav>
+
+    <main class="main">
+      <div class="greeting-row">
+        <div class="greeting"><span id="day">Happy Saturday</span>, <span class="editable" contenteditable="true" id="name">Karen</span></div>
+        <div class="share-link">Share your skool link</div>
+      </div>
+
+      <div class="section-label">Overview</div>
+      <div class="cards">
+        <div class="card">
+          <span class="metric" contenteditable="true" data-format="number" id="m-members">2,500</span>
+          <div class="metric-label">Members</div>
+        </div>
+        <div class="card">
+          <span style="font-size:22px;font-weight:700;">$</span><span class="metric" contenteditable="true" data-format="number" id="m-mrr">30,000</span>
+          <div class="metric-label">MRR</div>
+        </div>
+        <div class="card">
+          <span class="metric" contenteditable="true" data-format="plain" id="m-engagement">75</span><span style="font-size:22px;font-weight:700;">%</span>
+          <div class="metric-label">Engagement</div>
+        </div>
+        <div class="card">
+          <span class="metric" contenteditable="true" data-format="plain" id="m-retention">90</span><span style="font-size:22px;font-weight:700;">%</span>
+          <div class="metric-label">Retention</div>
+        </div>
+      </div>
+
+      <div class="section-row">
+        <div class="section-label" style="margin-bottom:0;">Growth</div>
+        <span class="period">Last 30 days &#9662;</span>
+      </div>
+      <div class="cards">
+        <div class="card">
+          <span class="metric" contenteditable="true" data-format="number" id="m-visitors">5,000</span>
+          <div class="metric-label">Visitors</div>
+        </div>
+        <div class="card" style="background:#ffffff;border-color:#dcd9d1;box-shadow:0 2px 6px rgba(0,0,0,0.06);">
+          <span class="metric" contenteditable="true" data-format="number" id="m-signups">250</span>
+          <div class="metric-label">Signups</div>
+        </div>
+        <div class="card">
+          <span class="metric" contenteditable="true" data-format="plain" id="m-conversion">5</span><span style="font-size:22px;font-weight:700;">%</span>
+          <div class="metric-label">Conversion rate</div>
+        </div>
+        <div class="card">
+          <span style="font-size:22px;font-weight:700;">$</span><span class="metric" contenteditable="true" data-format="number" id="m-newmrr">2,250</span>
+          <div class="metric-label">New MRR</div>
+        </div>
+      </div>
+
+      <div class="signups-section">
+        <div class="section-label">Where your signups come from</div>
+        <div class="signups-flex">
+          <div class="donut-wrap">
+            <svg viewBox="0 0 200 200" width="220" height="220" id="donut"></svg>
+          </div>
+          <div class="source-list" id="sources"></div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <div class="footer">
+    <span class="hint">Click any number or name to edit it. This is your vision — make it big.</span>
+    <button class="reset" id="reset">Reset to defaults</button>
+  </div>
+
+  <div class="brand-footer">
+    <div class="brand-name">
+      <span style="color:#3D5A73;">S</span><span style="color:#D9705C;">k</span><span style="color:#E0A832;">o</span><span style="color:#8A9A72;">o</span><span style="color:#DE9494;">l</span><span style="color:#3D5A73;">H</span><span style="color:#7FA9BC;">e</span><span style="color:#D9705C;">r</span><span style="color:#E0A832;">s</span>
+    </div>
+    <div class="brand-tagline">Made with love for women building Skool communities</div>
+    <a class="brand-link" href="https://www.skool.com/skoolhers" target="_blank" rel="noopener">Join us at SkoolHers</a>
+  </div>
+</div>
+
+<script>
+var defaults = {
+  logo: 'S', community: 'SkoolHers', name: 'Karen',
+  'm-members': '2,500', 'm-mrr': '30,000', 'm-engagement': '75', 'm-retention': '90',
+  'm-visitors': '5,000', 'm-signups': '250', 'm-conversion': '5', 'm-newmrr': '2,250',
+  's-affiliate': '125', 's-direct': '75', 's-network': '50'
+};
+
+var sourceData = [
+  { id: 's-affiliate', name: 'Affiliate', color: '#e8795a' },
+  { id: 's-direct', name: 'Direct', color: '#b8c99a' },
+  { id: 's-network', name: 'Skool network', color: '#6fb3c4' }
+];
+
+var days = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+document.getElementById('day').textContent = 'Happy ' + days[new Date().getDay()];
+
+function getSourceValues() {
+  return sourceData.map(function(s) {
+    var el = document.getElementById(s.id);
+    var n = Number((el ? el.textContent : '0').replace(/[^0-9.]/g, ''));
+    return isNaN(n) ? 0 : n;
+  });
+}
+
+function renderSources() {
+  var container = document.getElementById('sources');
+  container.innerHTML = sourceData.map(function(s, i) {
+    return '<div class="source-row">' +
+      '<span class="source-dot" style="background:' + s.color + '"></span>' +
+      '<span class="source-name">' + s.name + '</span>' +
+      '<span class="source-count" contenteditable="true" id="' + s.id + '">' + defaults[s.id] + '</span>' +
+      '<span class="source-pct" id="' + s.id + '-pct"></span>' +
+      '</div>';
+  }).join('');
+  sourceData.forEach(function(s) {
+    document.getElementById(s.id).addEventListener('blur', updateDonut);
+  });
+}
+
+function updateDonut() {
+  var values = getSourceValues();
+  var total = values.reduce(function(a, b) { return a + b; }, 0);
+  var svg = document.getElementById('donut');
+  if (total <= 0) { svg.innerHTML = ''; return; }
+
+  var cx = 100, cy = 100, r = 80;
+  var startAngle = -Math.PI / 2;
+  var paths = '';
+  values.forEach(function(v, i) {
+    if (v <= 0) return;
+    var frac = v / total;
+    var pct = Math.round(frac * 100);
+    var pctEl = document.getElementById(sourceData[i].id + '-pct');
+    if (pctEl) pctEl.textContent = '(' + pct + '%)';
+    if (frac >= 0.999) {
+      paths += '<circle cx="' + cx + '" cy="' + cy + '" r="' + r + '" fill="' + sourceData[i].color + '"/>';
+      startAngle += frac * 2 * Math.PI;
+      return;
+    }
+    var endAngle = startAngle + frac * 2 * Math.PI;
+    var x1 = cx + r * Math.cos(startAngle), y1 = cy + r * Math.sin(startAngle);
+    var x2 = cx + r * Math.cos(endAngle), y2 = cy + r * Math.sin(endAngle);
+    var large = frac > 0.5 ? 1 : 0;
+    paths += '<path d="M' + cx + ',' + cy + ' L' + x1.toFixed(2) + ',' + y1.toFixed(2) +
+      ' A' + r + ',' + r + ' 0 ' + large + ' 1 ' + x2.toFixed(2) + ',' + y2.toFixed(2) +
+      ' Z" fill="' + sourceData[i].color + '"/>';
+    startAngle = endAngle;
+  });
+  values.forEach(function(v, i) {
+    if (v > 0) return;
+    var pctEl = document.getElementById(sourceData[i].id + '-pct');
+    if (pctEl) pctEl.textContent = '(0%)';
+  });
+  paths += '<circle cx="' + cx + '" cy="' + cy + '" r="22" fill="#ffffff"/>';
+  svg.innerHTML = paths;
+}
+
+function formatField(el) {
+  var format = el.getAttribute('data-format');
+  var raw = el.textContent.replace(/[^0-9.]/g, '');
+  if (raw === '') return;
+  var num = Number(raw);
+  if (isNaN(num)) return;
+  if (format === 'number') {
+    el.textContent = Math.round(num).toLocaleString('en-US');
+  } else {
+    el.textContent = num.toString();
+  }
+}
+
+document.querySelectorAll('.metric').forEach(function(el) {
+  el.addEventListener('blur', function() { formatField(el); });
+  el.addEventListener('keydown', function(e) {
+    if (e.key === 'Enter') { e.preventDefault(); el.blur(); }
+  });
+});
+
+document.getElementById('reset').addEventListener('click', function() {
+  Object.keys(defaults).forEach(function(id) {
+    var el = document.getElementById(id);
+    if (el) el.textContent = defaults[id];
+  });
+  updateDonut();
+});
+
+renderSources();
+updateDonut();
+</script>
+</body>
+</html>
